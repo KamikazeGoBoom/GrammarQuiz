@@ -83,6 +83,11 @@ fun MainScreen(
     var progressData by remember { mutableStateOf(getProgressData()) }
     var analyticsData by remember { mutableStateOf(getAnalyticsData()) }
 
+    LaunchedEffect(Unit) {
+        progressData = getProgressData()
+        analyticsData = getAnalyticsData()
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -96,11 +101,31 @@ fun MainScreen(
             style = MaterialTheme.typography.headlineMedium
         )
 
-        QuizButton("Verb Quiz", "VERB", onStartQuiz)
-        QuizButton("Noun Quiz", "NOUN", onStartQuiz)
-        QuizButton("Adjective Quiz", "ADJECTIVE", onStartQuiz)
-        QuizButton("Adverb Quiz", "ADVERB", onStartQuiz)
-        QuizButton("Sentence Structure Quiz", "SENTENCE", onStartQuiz)
+        QuizButton("Verb Quiz", "VERB") {
+            onStartQuiz("VERB")
+            progressData = getProgressData()
+            analyticsData = getAnalyticsData()
+        }
+        QuizButton("Noun Quiz", "NOUN") {
+            onStartQuiz("NOUN")
+            progressData = getProgressData()
+            analyticsData = getAnalyticsData()
+        }
+        QuizButton("Adjective Quiz", "ADJECTIVE") {
+            onStartQuiz("ADJECTIVE")
+            progressData = getProgressData()
+            analyticsData = getAnalyticsData()
+        }
+        QuizButton("Adverb Quiz", "ADVERB") {
+            onStartQuiz("ADVERB")
+            progressData = getProgressData()
+            analyticsData = getAnalyticsData()
+        }
+        QuizButton("Sentence Structure Quiz", "SENTENCE") {
+            onStartQuiz("SENTENCE")
+            progressData = getProgressData()
+            analyticsData = getAnalyticsData()
+        }
 
         Spacer(modifier = Modifier.height(32.dp))
 
@@ -151,9 +176,9 @@ fun MainScreen(
 }
 
 @Composable
-fun QuizButton(text: String, category: String, onStartQuiz: (String) -> Unit) {
+fun QuizButton(text: String, category: String, onClick: () -> Unit) {
     Button(
-        onClick = { onStartQuiz(category) },
+        onClick = onClick,
         modifier = Modifier.fillMaxWidth()
     ) {
         Text(text)
