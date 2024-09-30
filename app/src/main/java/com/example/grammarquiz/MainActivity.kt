@@ -30,7 +30,8 @@ class MainActivity : ComponentActivity() {
                         categories.associateWith { category ->
                             calculateCategoryScore(category)
                         }
-                    }
+                    },
+                    getAnalyticsData = { getAnalyticsData() }
                 )
             }
         }
@@ -44,11 +45,43 @@ class MainActivity : ComponentActivity() {
         }
         return if (scores.isNotEmpty()) scores.average().roundToInt() else 0
     }
+
+    private fun getAnalyticsData(): Map<String, Any> {
+        val categories = listOf("VERB", "NOUN", "ADJECTIVE", "ADVERB", "SENTENCE")
+        val sharedPref = getSharedPreferences("QuizPrefs", MODE_PRIVATE)
+
+        val categoryScores = categories.associateWith { category ->
+            (1..5).mapNotNull { index ->
+                sharedPref.getInt("${category}_SCORE_$index", -1).takeIf { it != -1 }
+            }
+        }
+
+        val overallAverage = categoryScores.values.flatten().takeIf { it.isNotEmpty() }?.average() ?: 0.0
+        val categoryAverages = categoryScores.mapValues { (_, scores) ->
+            scores.takeIf { it.isNotEmpty() }?.average() ?: 0.0
+        }
+        val mostImprovedCategory = categoryScores.entries.maxByOrNull { (_, scores) ->
+            if (scores.size >= 2) scores.last() - scores.first() else 0
+        }?.key ?: "N/A"
+        val totalQuizzesTaken = categoryScores.values.sumOf { it.size }
+
+        return mapOf(
+            "overallAverage" to overallAverage,
+            "categoryAverages" to categoryAverages,
+            "mostImprovedCategory" to mostImprovedCategory,
+            "totalQuizzesTaken" to totalQuizzesTaken
+        )
+    }
 }
 
 @Composable
-fun MainScreen(onStartQuiz: (String) -> Unit, getProgressData: () -> Map<String, Int>) {
+fun MainScreen(
+    onStartQuiz: (String) -> Unit,
+    getProgressData: () -> Map<String, Int>,
+    getAnalyticsData: () -> Map<String, Any>
+) {
     var progressData by remember { mutableStateOf(getProgressData()) }
+    var analyticsData by remember { mutableStateOf(getAnalyticsData()) }
 
     Column(
         modifier = Modifier
@@ -72,14 +105,34 @@ fun MainScreen(onStartQuiz: (String) -> Unit, getProgressData: () -> Map<String,
         Spacer(modifier = Modifier.height(32.dp))
 
         Text(
-            text = "Progress Report",
+            text = "Analytics Dashboard",
             style = MaterialTheme.typography.headlineSmall
         )
 
-        progressData.forEach { (category, score) ->
+        Text(
+            text = "Overall Average Score: ${String.format("%.2f", analyticsData["overallAverage"] as Double)}",
+            style = MaterialTheme.typography.bodyLarge
+        )
+
+        Text(
+            text = "Total Quizzes Taken: ${analyticsData["totalQuizzesTaken"]}",
+            style = MaterialTheme.typography.bodyLarge
+        )
+
+        Text(
+            text = "Most Improved Category: ${analyticsData["mostImprovedCategory"]}",
+            style = MaterialTheme.typography.bodyLarge
+        )
+
+        Text(
+            text = "Category Averages:",
+            style = MaterialTheme.typography.bodyLarge
+        )
+
+        (analyticsData["categoryAverages"] as Map<String, Double>).forEach { (category, average) ->
             Text(
-                text = "$category: $score",
-                style = MaterialTheme.typography.bodyLarge
+                text = "$category: ${String.format("%.2f", average)}",
+                style = MaterialTheme.typography.bodyMedium
             )
         }
 
