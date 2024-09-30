@@ -59,14 +59,15 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
 
-    // Add these lines for AppCompat and Activity KTX
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.activity:activity-ktx:1.8.2")
 
-    // Add these lines for additional Compose dependencies
     implementation("androidx.compose.material:material:1.5.4")
     implementation("androidx.compose.ui:ui:1.5.4")
     implementation("androidx.compose.ui:ui-tooling-preview:1.5.4")
+
+    // Add Google Sign-In dependency
+    implementation("com.google.android.gms:play-services-auth:20.5.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
